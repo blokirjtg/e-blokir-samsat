@@ -76,11 +76,11 @@
     </div>
 
     <script>
-        const SCRIPT_URL = 'URL_WEB_APP_ANDA'; // GANTI INI!
+        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxjQGzW-4cdphzTngblDEaeAlYO-fx2f9DP28t1_dtGa5VlUA79d7hiwHysg5uX7kF3/exec'; // GANTI INI!
         let db = [];
 
         async function renderTable() {
-            if(SCRIPT_URL === 'URL_WEB_APP_ANDA') return;
+            if(SCRIPT_URL === 'https://script.google.com/macros/s/AKfycbxjQGzW-4cdphzTngblDEaeAlYO-fx2f9DP28t1_dtGa5VlUA79d7hiwHysg5uX7kF3/exec') return;
             try {
                 const res = await fetch(SCRIPT_URL);
                 const data = await res.json();
@@ -138,4 +138,5 @@
         window.onload = renderTable;
     </script>
 </body>
+
 </html>
