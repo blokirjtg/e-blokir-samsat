@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Input E-Blokir Samsat</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/browser-image-compression/2.0.2/browser-image-compression.min.js"></script>
+</head>
+<body class="bg-slate-100 min-h-screen font-sans">
+    <nav class="bg-blue-800 p-4 text-white shadow-lg mb-6">
+        <div class="container mx-auto font-bold uppercase tracking-widest text-center">Formulir E-Blokir Samsat</div>
+    </nav>
+
+    <main class="container mx-auto px-4 pb-20">
+        <div class="max-w-lg mx-auto bg-white rounded-2xl shadow-xl overflow-hidden border border-slate-200">
+            <div class="bg-gradient-to-r from-blue-700 to-indigo-600 p-6 text-white text-center">
+                <h2 class="text-xl font-black italic uppercase tracking-tighter">Input Data Kendaraan</h2>
+            </div>
+            
+            <form id="formUser" class="p-6 space-y-5" onsubmit="handleKirim(event)">
+                <div>
+                    <label class="block text-xs font-bold text-slate-500 mb-1 uppercase">Nama Penginput (User)</label>
+                    <input type="text" id="user" required placeholder="Nama Anda" class="w-full p-3 border rounded-xl outline-none focus:ring-2 focus:ring-blue-500 bg-slate-50">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-slate-500 mb-1 uppercase">Unit Samsat</label>
+                    <select id="samsat" required class="w-full p-3 border rounded-xl outline-none bg-slate-50">
+                        <option value="">-- Pilih Unit Samsat --</option>
+                        <option>Samsat Kota Semarang 1</option>
+                        <option>Samsat Kota Semarang 2</option>
+                        <option>Samsat Kota Semarang 3</option>
+                    </select>
+                </div>
+
+                <div id="nopolWrapper">
+                    <label class="block text-xs font-bold text-slate-500 mb-1 uppercase">Nomor Polisi (H)</label>
+                    <div class="flex gap-2">
+                        <input type="text" value="H" readonly class="w-12 p-3 bg-slate-200 rounded-xl text-center font-bold text-slate-600">
+                        <input type="number" id="nopolA" required placeholder="1234" class="flex-1 p-3 border rounded-xl text-center font-bold text-lg focus:ring-2 focus:ring-blue-500">
+                        <input type="text" id="nopolB" required placeholder="ABC" maxlength="3" class="w-24 p-3 border rounded-xl text-center uppercase font-bold text-lg focus:ring-2 focus:ring-blue-500">
+                    </div>
+                </div>
+
+                <div class="p-4 border-2 border-dashed rounded-xl bg-blue-50 border-blue-200">
+                    <label class="block text-xs font-bold text-blue-800 mb-2 uppercase">Upload Dokumen / Foto STNK</label>
+                    <input type="file" id="files" required multiple accept="image/*" capture="environment" class="text-xs w-full file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-blue-600 file:text-white hover:file:bg-blue-700">
+                    <p class="text-[9px] text-slate-400 mt-2">*Bisa upload lebih dari 1 foto. Gunakan kamera langsung jika perlu.</p>
+                </div>
+
+                <button id="btnKirim" type="submit" class="w-full bg-blue-700 text-white py-4 rounded-2xl font-black text-lg shadow-lg hover:bg-black transition transform active:scale-95">KIRIM PERMOHONAN</button>
+            </form>
+        </div>
+    </main>
+
+    <script>
+        // GANTI DENGAN URL WEB APP DARI GOOGLE APPS SCRIPT ANDA
+        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxjQGzW-4cdphzTngblDEaeAlYO-fx2f9DP28t1_dtGa5VlUA79d7hiwHysg5uX7kF3/exec'; 
+
+        async function handleKirim(e) {
+            e.preventDefault();
+            const btn = document.getElementById('btnKirim');
+            
+            if(SCRIPT_URL === 'https://script.google.com/macros/s/AKfycbxjQGzW-4cdphzTngblDEaeAlYO-fx2f9DP28t1_dtGa5VlUA79d7hiwHysg5uX7kF3/exec') {
+                alert('Peringatan: Anda belum memasukkan URL Web App Google!');
+                return;
+            }
+
+            btn.disabled = true;
+            btn.innerText = "MENGOMPRES & MENGIRIM...";
+
+            try {
+                const files = document.getElementById('files').files;
+                const fileList = [];
+                const options = { maxSizeMB: 0.3, maxWidthOrHeight: 1280, useWebWorker: true };
+
+                for (let f of files) {
+                    const compressed = await imageCompression(f, options);
+                    const base64 = await new Promise(r => { 
+                        const rd = new FileReader(); 
+                        rd.readAsDataURL(compressed); 
+                        rd.onload = () => r(rd.result); 
+                    });
+                    fileList.push({ base64, type: f.type });
+                }
+
+                await fetch(SCRIPT_URL, {
+                    method: 'POST',
+                    mode: 'no-cors',
+                    body: JSON.stringify({ 
+                        user: document.getElementById('user').value, 
+                        samsat: document.getElementById('samsat').value, 
+                        nopol: `H ${document.getElementById('nopolA').value} ${document.getElementById('nopolB').value}`.toUpperCase(), 
+                        files: fileList 
+                    })
+                });
+
+                alert('Berhasil! Data dan Foto Terkirim ke Database.');
+                location.reload();
+            } catch (err) {
+                console.error(err);
+                alert('Terjadi kesalahan saat mengirim data.');
+                btn.disabled = false;
+                btn.innerText = "KIRIM PERMOHONAN";
+            }
+        }
+    </script>
+</body>
+</html>
